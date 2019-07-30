@@ -16,7 +16,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Preprocessing BCCWJ dataset.')
     parser.add_argument('--seed', type=int, default=13)
     parser.add_argument('--data_dir', type=str, default='data')
-    parser.add_argument('--bert_model', type=str, default='mt_dnn_models/bert_model_base_uncased.pt')
+    parser.add_argument('--bert_model', type=str, default='mt_dnn_models/vocab.txt')
     parser.add_argument('--max_seq_len', type=int, default=128)
     args = parser.parse_args()
     return args
@@ -35,7 +35,7 @@ def load_ner(file, eos='。'):
             if contents.startswith("-DOCSTART-") or len(contents) == 0:
                     continue
 
-            if words[-1] == eos:
+            if len(words) > 0 and words[-1] == eos:
                 sample = {'uid': str(cnt), 'premise': words, 'label': labels}
                 rows.append(sample)
                 cnt += 1
@@ -62,17 +62,18 @@ def load_pos(file, eos='。'):
             if contents.startswith("-DOCSTART-") or len(contents) == 0:
                     continue
 
-            if words[-1] == eos:
+            if len(words) > 0 and words[-1] == eos:
                 sample = {'uid': str(cnt), 'premise': words, 'label': labels}
                 rows.append(sample)
                 cnt += 1
                 words = []
                 labels = []
             else:
-                word = contents.split(' ')[0]
-                label = contents.split(' ')[-1]
-                words.append(word)
-                labels.append(label)
+                if len(contents.split(' ')) == 3:
+                    word = contents.split(' ')[0]
+                    label = contents.split(' ')[1]
+                    words.append(word)
+                    labels.append(label)
     return rows
 
 
@@ -94,9 +95,10 @@ def build_data(data, dump_path, tokenizer, label_mapper, max_seq_len=128):
                         labels.append('X')
 
             # Account for [CLS] and [SEP] with "- 2"
-            if len(premise) > max_seq_len - 2:
+            if len(tokens) > max_seq_len - 2:
                 tokens = tokens[:max_seq_len - 2]
                 labels = labels[:max_seq_len - 2]
+
             labels = ['[CLS]'] + labels[:max_seq_len - 2] + ['[SEP]']
             label = [label_mapper[lab] for lab in labels]
             input_ids = tokenizer.convert_tokens_to_ids(['[CLS]'] + tokens + ['[SEP]'])
@@ -114,7 +116,7 @@ def main(args):
     dev_path = os.path.join(root, 'dev.txt')
     test_path = os.path.join(root, 'test.txt')
 
-    tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=False, do_basic_tokenize=False)
+    tokenizer = BertTokenizer(args.bert_model, do_lower_case=False)
 
     ############
     # NER
@@ -129,6 +131,8 @@ def main(args):
     logger.info('Loaded {} NER test samples'.format(len(test_data)))
 
     # build
+    if not os.path.exists(os.path.join(root, 'ner')):
+        os.makedirs(os.path.join(root, 'ner'))
     train_fout = os.path.join(root, 'ner/train.json')
     dev_fout = os.path.join(root, 'ner/dev.json')
     test_fout = os.path.join(root, 'ner/test.json')
@@ -151,6 +155,8 @@ def main(args):
     logger.info('Loaded {} POS test samples'.format(len(test_data)))
 
     # build
+    if not os.path.exists(os.path.join(root, 'pos')):
+        os.makedirs(os.path.join(root, 'pos'))
     train_fout = os.path.join(root, 'pos/train.json')
     dev_fout = os.path.join(root, 'pos/dev.json')
     test_fout = os.path.join(root, 'pos/test.json')
