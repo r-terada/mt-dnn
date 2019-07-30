@@ -2,7 +2,7 @@
 from enum import Enum
 
 from sklearn.metrics import matthews_corrcoef
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from scipy.stats import pearsonr, spearmanr
 
 def compute_acc(predicts, labels):
@@ -22,6 +22,12 @@ def compute_spearman(predicts, labels):
     scof = spearmanr(labels, predicts)[0]
     return 100.0 * scof
 
+def compute_precision(predicts, labels):
+    return 100.0 * precision_score(labels, predicts)
+
+def compute_recall(predicts, labels):
+    return 100.0 * recall_score(labels, predicts)
+
 
 class Metric(Enum):
     ACC = 0
@@ -29,6 +35,8 @@ class Metric(Enum):
     MCC = 2
     Pearson = 3
     Spearman = 4
+    Precision = 5
+    Recall = 6
 
 
 METRIC_FUNC = {
@@ -37,4 +45,6 @@ METRIC_FUNC = {
  Metric.MCC: compute_mcc,
  Metric.Pearson: compute_pearson,
  Metric.Spearman: compute_spearman,
+ Metric.Precision: compute_precision,
+ Metric.Recall: compute_recall,
 }

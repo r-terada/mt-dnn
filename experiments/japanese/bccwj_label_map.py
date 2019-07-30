@@ -44,3 +44,18 @@ POSLabelMapper.add("O")
 POSLabelMapper.add("X")
 POSLabelMapper.add("[CLS]")
 POSLabelMapper.add("[SEP]")
+
+GLOBAL_MAP = {
+    'ner': NERLabelMapper,
+    'pos': POSLabelMapper,
+}
+
+METRIC_META = {
+    'ner': [1, 5, 6],
+    'pos': [1, 5, 6],
+}
+
+SAN_META = {
+    'ner': 0,
+    'pos': 0,
+}
