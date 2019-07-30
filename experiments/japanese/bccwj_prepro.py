@@ -7,7 +7,7 @@ path.append(os.getcwd())
 from pytorch_pretrained_bert.tokenization import BertTokenizer
 
 from data_utils.log_wrapper import create_logger
-from experiments.japanese.bccwj_label_map import NERLabelMapper
+from experiments.japanese.bccwj_label_map import NERLabelMapper, POSLabelMapper
 
 logger = create_logger(__name__, to_disk=True, log_file='glue_prepro.log')
 
@@ -49,7 +49,34 @@ def load_ner(file, eos='。'):
     return rows
 
 
-def build_data(data, dump_path, tokenizer, max_seq_len=128):
+def load_pos(file, eos='。'):
+    """Loading data of bccwj with POS labels
+    """
+    rows = []
+    cnt = 0
+    with open(file, encoding="utf8") as f:
+        words = []
+        labels = []
+        for line in f:
+            contents = line.strip()
+            if contents.startswith("-DOCSTART-") or len(contents) == 0:
+                    continue
+
+            if words[-1] == eos:
+                sample = {'uid': str(cnt), 'premise': words, 'label': labels}
+                rows.append(sample)
+                cnt += 1
+                words = []
+                labels = []
+            else:
+                word = contents.split(' ')[0]
+                label = contents.split(' ')[-1]
+                words.append(word)
+                labels.append(label)
+    return rows
+
+
+def build_data(data, dump_path, tokenizer, label_mapper, max_seq_len=128):
     with open(dump_path, 'w', encoding='utf-8') as writer:
         for idx, sample in enumerate(data):
             ids = sample['uid']
@@ -71,7 +98,7 @@ def build_data(data, dump_path, tokenizer, max_seq_len=128):
                 tokens = tokens[:max_seq_len - 2]
                 labels = labels[:max_seq_len - 2]
             labels = ['[CLS]'] + labels[:max_seq_len - 2] + ['[SEP]']
-            label = [NERLabelMapper[lab] for lab in labels]
+            label = [label_mapper[lab] for lab in labels]
             input_ids = tokenizer.convert_tokens_to_ids(['[CLS]'] + tokens + ['[SEP]'])
             assert len(label) == len(input_ids)
             type_ids = [0] * ( len(tokens) + 2)
@@ -106,10 +133,32 @@ def main(args):
     dev_fout = os.path.join(root, 'ner/dev.json')
     test_fout = os.path.join(root, 'ner/test.json')
 
-    build_data(train_data, train_fout, tokenizer, args.max_seq_len)
-    build_data(dev_data, dev_fout, tokenizer, args.max_seq_len)
-    build_data(test_data, test_fout, tokenizer, args.max_seq_len)
+    build_data(train_data, train_fout, tokenizer, NERLabelMapper, args.max_seq_len)
+    build_data(dev_data, dev_fout, tokenizer, NERLabelMapper, args.max_seq_len)
+    build_data(test_data, test_fout, tokenizer, NERLabelMapper, args.max_seq_len)
     logger.info('done with NER')
+
+    ############
+    # POS Tagging
+    ############
+
+    # load
+    train_data = load_pos(train_path)
+    dev_data = load_pos(dev_path)
+    test_data = load_pos(test_path)
+    logger.info('Loaded {} POS train samples'.format(len(train_data)))
+    logger.info('Loaded {} POS dev samples'.format(len(dev_data)))
+    logger.info('Loaded {} POS test samples'.format(len(test_data)))
+
+    # build
+    train_fout = os.path.join(root, 'pos/train.json')
+    dev_fout = os.path.join(root, 'pos/dev.json')
+    test_fout = os.path.join(root, 'pos/test.json')
+
+    build_data(train_data, train_fout, tokenizer, POSLabelMapper, args.max_seq_len)
+    build_data(dev_data, dev_fout, tokenizer, POSLabelMapper, args.max_seq_len)
+    build_data(test_data, test_fout, tokenizer, POSLabelMapper, args.max_seq_len)
+    logger.info('done with POSTagging')
 
 
 if __name__ == "__main__":
