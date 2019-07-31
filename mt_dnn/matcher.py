@@ -3,6 +3,7 @@
 import torch.nn as nn
 from pytorch_pretrained_bert.modeling import BertConfig, BertLayerNorm, BertModel
 
+from data_utils.task_def import TaskType
 from module.dropout_wrapper import DropoutWrapper
 from module.san import SANClassifier
 
@@ -21,6 +22,7 @@ class SANBertNetwork(nn.Module):
                 p.requires_grad = False
         mem_size = self.bert_config.hidden_size
         self.decoder_opt = opt['answer_opt']
+        self.task_types = opt['task_types']
         self.scoring_list = nn.ModuleList()
         labels = [int(ls) for ls in opt['label_size'].split(',')]
         task_dropout_p = opt['tasks_dropout_p']
@@ -30,12 +32,17 @@ class SANBertNetwork(nn.Module):
             decoder_opt = self.decoder_opt[task]
             dropout = DropoutWrapper(task_dropout_p[task], opt['vb_dropout'])
             self.dropout_list.append(dropout)
-            if decoder_opt == 1:
-                out_proj = SANClassifier(mem_size, mem_size, lab, opt, prefix='answer', dropout=dropout)
-                self.scoring_list.append(out_proj)
-            else:
+            task_type = self.task_types[task]
+            if task_type == TaskType.SequenceLabeling:
                 out_proj = nn.Linear(self.bert_config.hidden_size, lab)
                 self.scoring_list.append(out_proj)
+            else:
+                if decoder_opt == 1:
+                    out_proj = SANClassifier(mem_size, mem_size, lab, opt, prefix='answer', dropout=dropout)
+                    self.scoring_list.append(out_proj)
+                else:
+                    out_proj = nn.Linear(self.bert_config.hidden_size, lab)
+                    self.scoring_list.append(out_proj)
 
         self.opt = opt
         self._my_init()
@@ -100,15 +107,23 @@ class SANBertNetwork(nn.Module):
         sequence_output = all_encoder_layers[-1]
         if self.bert_pooler is not None:
             pooled_output = self.bert_pooler(sequence_output)
-        decoder_opt = self.decoder_opt[task_id]
-        if decoder_opt == 1:
-            max_query = hyp_mask.size(1)
-            assert max_query > 0
-            assert premise_mask is not None
-            assert hyp_mask is not None
-            hyp_mem = sequence_output[:, :max_query, :]
-            logits = self.scoring_list[task_id](sequence_output, hyp_mem, premise_mask, hyp_mask)
-        else:
+
+        task_type = self.task_types[task_id]
+        if task_type == TaskType.SequenceLabeling:
+            pooled_output = all_encoder_layers[-1]
             pooled_output = self.dropout_list[task_id](pooled_output)
+            pooled_output = pooled_output.view(-1, pooled_output.size(2))
             logits = self.scoring_list[task_id](pooled_output)
+        else:
+            decoder_opt = self.decoder_opt[task_id]
+            if decoder_opt == 1:
+                max_query = hyp_mask.size(1)
+                assert max_query > 0
+                assert premise_mask is not None
+                assert hyp_mask is not None
+                hyp_mem = sequence_output[:,:max_query,:]
+                logits = self.scoring_list[task_id](sequence_output, hyp_mem, premise_mask, hyp_mask)
+            else:
+                pooled_output = self.dropout_list[task_id](pooled_output)
+                logits = self.scoring_list[task_id](pooled_output)
         return logits
