@@ -34,6 +34,7 @@ pos:
   data_format: PremiseOnly
   enable_san: false
   labels:
+  - O
   - "\u526F\u8A5E"
   - "\u52A9\u8A5E"
   - "\u52D5\u8A5E"
@@ -49,7 +50,6 @@ pos:
   - "\u63A5\u982D\u8F9E"
   - "\u9023\u4F53\u8A5E"
   - "\u672A\u5B9A\u7FA9\u8A9E"
-  - O
   - X
   - '[CLS]'
   - '[SEP]'
