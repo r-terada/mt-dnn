@@ -131,11 +131,9 @@ def main(args):
     logger.info('Loaded {} NER test samples'.format(len(test_data)))
 
     # build
-    if not os.path.exists(os.path.join(root, 'ner')):
-        os.makedirs(os.path.join(root, 'ner'))
-    train_fout = os.path.join(root, 'ner/train.json')
-    dev_fout = os.path.join(root, 'ner/dev.json')
-    test_fout = os.path.join(root, 'ner/test.json')
+    train_fout = os.path.join(root, 'ner_train.json')
+    dev_fout = os.path.join(root, 'ner_dev.json')
+    test_fout = os.path.join(root, 'ner_test.json')
 
     build_data(train_data, train_fout, tokenizer, NERLabelMapper, args.max_seq_len)
     build_data(dev_data, dev_fout, tokenizer, NERLabelMapper, args.max_seq_len)
@@ -155,11 +153,9 @@ def main(args):
     logger.info('Loaded {} POS test samples'.format(len(test_data)))
 
     # build
-    if not os.path.exists(os.path.join(root, 'pos')):
-        os.makedirs(os.path.join(root, 'pos'))
-    train_fout = os.path.join(root, 'pos/train.json')
-    dev_fout = os.path.join(root, 'pos/dev.json')
-    test_fout = os.path.join(root, 'pos/test.json')
+    train_fout = os.path.join(root, 'pos_train.json')
+    dev_fout = os.path.join(root, 'pos_dev.json')
+    test_fout = os.path.join(root, 'pos_test.json')
 
     build_data(train_data, train_fout, tokenizer, POSLabelMapper, args.max_seq_len)
     build_data(dev_data, dev_fout, tokenizer, POSLabelMapper, args.max_seq_len)
