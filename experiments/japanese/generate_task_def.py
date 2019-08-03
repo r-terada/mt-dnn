@@ -15,7 +15,7 @@ for task in ['ner', 'pos']:
 
     n_class = len(labels)
     metric_meta = tuple(Metric(metric_no).name for metric_no in METRIC_META[task])
-    enable_san = bool(SAN_META[task])
+    enable_san = SAN_META[task]
 
     task_def = {"task_type": task_type.name,
                 "data_format": data_format.name,

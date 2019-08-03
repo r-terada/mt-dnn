@@ -1,6 +1,6 @@
 ner:
   data_format: PremiseOnly
-  enable_san: false
+  enable_san: 2
   labels:
   - O
   - B-MISC
@@ -32,7 +32,7 @@ ner:
   task_type: SequenceLabeling
 pos:
   data_format: PremiseOnly
-  enable_san: false
+  enable_san: 2
   labels:
   - O
   - "\u526F\u8A5E"

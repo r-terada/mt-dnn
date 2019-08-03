@@ -56,6 +56,6 @@ METRIC_META = {
 }
 
 SAN_META = {
-    'ner': 0,
-    'pos': 0,
+    'ner': 2,
+    'pos': 2,
 }

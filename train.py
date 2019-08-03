@@ -36,7 +36,7 @@ def model_config(parser):
     parser.add_argument('--answer_dropout_p', type=float, default=0.1)
     parser.add_argument('--answer_weight_norm_on', action='store_true')
     parser.add_argument('--dump_state_on', action='store_true')
-    parser.add_argument('--answer_opt', type=int, default=0, help='0,1')
+    parser.add_argument('--answer_opt', type=int, default=0, help='0,1,2')
     parser.add_argument('--label_size', type=str, default='3')
     parser.add_argument('--mtl_opt', type=int, default=0)
     parser.add_argument('--ratio', type=float, default=0)
@@ -49,6 +49,7 @@ def model_config(parser):
 def data_config(parser):
     parser.add_argument('--log_file', default='mt-dnn-train.log', help='path for log file.')
     parser.add_argument("--init_checkpoint", default='mt_dnn_models/bert_model_base.pt', type=str)
+    parser.add_argument("--bert_config_path", default='mt_dnn_models/bert_model_base.pt', type=str)
     parser.add_argument('--data_dir', default='data/canonical_data/mt_dnn_uncased_lower')
     parser.add_argument('--data_sort_on', action='store_true')
     parser.add_argument('--name', default='farmer')
@@ -167,7 +168,8 @@ def main():
         if task_type == TaskType.Ranking:
             pw_task = True
 
-        dopt = generate_decoder_opt(task_defs.enable_san_map[prefix], opt['answer_opt'])
+        # dopt = generate_decoder_opt(task_defs.enable_san_map[prefix], opt['answer_opt'])
+        dopt = task_defs.enable_san_map[prefix]
         if task_id < len(decoder_opts):
             decoder_opts[task_id] = min(decoder_opts[task_id], dopt)
         else:
@@ -259,12 +261,11 @@ def main():
     if len(train_data_list) > 1 and args.ratio > 0:
         num_all_batches = int(args.epochs * (len(train_data_list[0]) * (1 + args.ratio)))
 
-    bert_model_path = args.init_checkpoint
+    bert_config_path = args.bert_config_path
     state_dict = None
 
-    if os.path.exists(bert_model_path):
-        state_dict = torch.load(bert_model_path)
-        config = state_dict['config']
+    if os.path.exists(bert_config_path):
+        config = json.load(open(bert_config_path, encoding="utf-8"))
         config['attention_probs_dropout_prob'] = args.bert_dropout_p
         config['hidden_dropout_prob'] = args.bert_dropout_p
         opt.update(config)
