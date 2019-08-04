@@ -25,9 +25,12 @@ ner:
   - '[CLS]'
   - '[SEP]'
   metric_meta:
-  - F1
-  - Precision
-  - Recall
+  - MICRO_F1
+  - MACRO_F1
+  - MICRO_Precision
+  - MACRO_Precision
+  - MICRO_Recall
+  - MACRO_Recall
   n_class: 22
   task_type: SequenceLabeling
 pos:
@@ -54,8 +57,11 @@ pos:
   - '[CLS]'
   - '[SEP]'
   metric_meta:
-  - F1
-  - Precision
-  - Recall
+  - MICRO_F1
+  - MACRO_F1
+  - MICRO_Precision
+  - MACRO_Precision
+  - MICRO_Recall
+  - MACRO_Recall
   n_class: 19
   task_type: SequenceLabeling
