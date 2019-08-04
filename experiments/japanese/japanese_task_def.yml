@@ -38,6 +38,7 @@ pos:
   enable_san: 2
   labels:
   - O
+  - '0'
   - "\u526F\u8A5E"
   - "\u52A9\u8A5E"
   - "\u52D5\u8A5E"
@@ -63,5 +64,5 @@ pos:
   - MACRO_Precision
   - MICRO_Recall
   - MACRO_Recall
-  n_class: 19
+  n_class: 20
   task_type: SequenceLabeling

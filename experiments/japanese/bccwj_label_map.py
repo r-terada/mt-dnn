@@ -26,6 +26,7 @@ NERLabelMapper.add('[SEP]')
 
 POSLabelMapper = Vocabulary(True)
 POSLabelMapper.add("O")
+POSLabelMapper.add("0")
 POSLabelMapper.add("副詞")
 POSLabelMapper.add("助詞")
 POSLabelMapper.add("動詞")
