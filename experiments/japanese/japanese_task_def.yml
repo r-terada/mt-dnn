@@ -1,5 +1,6 @@
 ner:
   data_format: PremiseOnly
+  dropout_p: 0.1
   enable_san: 2
   labels:
   - O
@@ -35,6 +36,7 @@ ner:
   task_type: SequenceLabeling
 pos:
   data_format: PremiseOnly
+  dropout_p: 0.1
   enable_san: 2
   labels:
   - O

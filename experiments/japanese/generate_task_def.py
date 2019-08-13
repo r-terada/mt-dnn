@@ -6,6 +6,10 @@ from data_utils.task_def import DataFormat, TaskType
 from experiments.japanese.bccwj_label_map import GLOBAL_MAP, METRIC_META, SAN_META
 
 task_def_dic = {}
+dropout_p_map = {
+    "ner": 0.1,
+    "pos": 0.1
+}
 for task in ['ner', 'pos']:
     task_type = TaskType.SequenceLabeling
     data_format = DataFormat.PremiseOnly
@@ -26,6 +30,10 @@ for task in ['ner', 'pos']:
 
     if labels is not None:
         task_def["labels"] = labels
+
+    dropout_p = dropout_p_map.get(task, None)
+    if dropout_p is not None:
+        task_def["dropout_p"] = dropout_p
 
     task_def_dic[task] = task_def
 
