@@ -55,7 +55,7 @@ def eval_model(model, data, metric_meta, use_cuda=True, with_label=True):
     # LabelMapper.add("[CLS]")
     # LabelMapper.add("[SEP]")
     # LabelMapper.add("O")
-    use_indices = [p > 2 for p in _flatten_list(predictions)]
+    use_indices = [p > 3 for p in _flatten_list(predictions)]
     if with_label:
         for mm in metric_meta:
             metric_name = mm.name
