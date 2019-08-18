@@ -8,10 +8,10 @@ from experiments.japanese.bccwj_label_map import GLOBAL_MAP, METRIC_META, SAN_ME
 task_def_dic = {}
 dropout_p_map = {
     "ner": 0.1,
-    "ner_ene": 0.1,
+    "nerall": 0.1,
     "pos": 0.1
 }
-for task in ['ner', 'ner_ene', 'pos']:
+for task in ['ner', 'nerall', 'pos']:
     task_type = TaskType.SequenceLabeling
     data_format = DataFormat.PremiseOnly
 

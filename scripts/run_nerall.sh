@@ -10,8 +10,8 @@ echo "export CUDA_VISIBLE_DEVICES=${gpu}"
 export CUDA_VISIBLE_DEVICES=${gpu}
 tstr=$(date +"%FT%H%M")
 
-train_datasets="ner_ene"
-test_datasets="ner_ene"
+train_datasets="nerall"
+test_datasets="nerall"
 MODEL_ROOT="checkpoints"
 
 BERT_PATH="mt_dnn_models/Japanese_L-12_H-768_A-12_E-30_BPE/pytorch_model.bin"

@@ -8,7 +8,7 @@ path.append(os.getcwd())
 from pytorch_pretrained_bert.tokenization import BertTokenizer
 
 from data_utils.log_wrapper import create_logger
-from experiments.japanese.bccwj_label_map import NERLabelMapper, NERENELabelMapper, POSLabelMapper
+from experiments.japanese.bccwj_label_map import NERLabelMapper, NERALLLabelMapper, POSLabelMapper
 
 logger = create_logger(__name__, to_disk=True, log_file='glue_prepro.log')
 
@@ -51,7 +51,7 @@ def load_ner(file, eos='。'):
     return rows
 
 
-def load_ner_ene(file, eos='。'):
+def load_nerall(file, eos='。'):
     """Loading data of bccwj with all ner labels
     """
     rows = []
@@ -143,7 +143,7 @@ def main(args):
 
     tasks = args.tasks.split(',')
     for t in tasks:
-        if not t in ['ner', 'pos', 'ner_ene']:
+        if not t in ['ner', 'pos', 'nerall']:
             sys.exit(f'invalid task name: {t}')
 
     train_path = os.path.join(root, 'train.txt')
@@ -177,24 +177,24 @@ def main(args):
     ############
     # NER ALL CLASS
     ############
-    if 'ner_ene' in tasks:
+    if 'nerall' in tasks:
         # load
-        train_data = load_ner_ene(train_path)
-        dev_data = load_ner_ene(dev_path)
-        test_data = load_ner_ene(test_path)
-        logger.info('Loaded {} NERENE train samples'.format(len(train_data)))
-        logger.info('Loaded {} NERENE dev samples'.format(len(dev_data)))
-        logger.info('Loaded {} NERENE test samples'.format(len(test_data)))
+        train_data = load_nerall(train_path)
+        dev_data = load_nerall(dev_path)
+        test_data = load_nerall(test_path)
+        logger.info('Loaded {} NERALL train samples'.format(len(train_data)))
+        logger.info('Loaded {} NERALL dev samples'.format(len(dev_data)))
+        logger.info('Loaded {} NERALL test samples'.format(len(test_data)))
 
         # build
-        train_fout = os.path.join(root, 'ner_ene_train.json')
-        dev_fout = os.path.join(root, 'ner_ene_dev.json')
-        test_fout = os.path.join(root, 'ner_ene_test.json')
+        train_fout = os.path.join(root, 'nerall_train.json')
+        dev_fout = os.path.join(root, 'nerall_dev.json')
+        test_fout = os.path.join(root, 'nerall_test.json')
 
-        build_data(train_data, train_fout, tokenizer, NERENELabelMapper, args.max_seq_len)
-        build_data(dev_data, dev_fout, tokenizer, NERENELabelMapper, args.max_seq_len)
-        build_data(test_data, test_fout, tokenizer, NERENELabelMapper, args.max_seq_len)
-        logger.info('done with NERENE')
+        build_data(train_data, train_fout, tokenizer, NERALLLabelMapper, args.max_seq_len)
+        build_data(dev_data, dev_fout, tokenizer, NERALLLabelMapper, args.max_seq_len)
+        build_data(test_data, test_fout, tokenizer, NERALLLabelMapper, args.max_seq_len)
+        logger.info('done with NERALL')
 
     ############
     # POS Tagging
