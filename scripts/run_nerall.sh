@@ -16,7 +16,7 @@ MODEL_ROOT="checkpoints"
 
 BERT_PATH="mt_dnn_models/Japanese_L-12_H-768_A-12_E-30_BPE/pytorch_model.bin"
 BERT_CONFIG_PATH="mt_dnn_models/Japanese_L-12_H-768_A-12_E-30_BPE/bert_config.json"
-DATA_DIR="data/bccwj"
+DATA_DIR="data/bccwj_all_class"
 TASK_DEF_PATH="experiments/japanese/japanese_task_def.yml"
 
 optim="adamax"
