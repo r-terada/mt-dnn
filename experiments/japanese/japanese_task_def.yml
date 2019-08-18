@@ -34,7 +34,7 @@ ner:
   - MACRO_Recall
   n_class: 22
   task_type: SequenceLabeling
-ner_ene:
+nerall:
   data_format: PremiseOnly
   dropout_p: 0.1
   enable_san: 2
