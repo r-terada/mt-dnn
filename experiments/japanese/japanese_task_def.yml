@@ -3,10 +3,10 @@ chunking:
   dropout_p: 0.1
   enable_san: 2
   labels:
-  - O
   - X
   - '[CLS]'
   - '[SEP]'
+  - O
   - B-NP
   - I-NP
   metric_meta:
@@ -23,6 +23,9 @@ ner:
   dropout_p: 0.1
   enable_san: 2
   labels:
+  - X
+  - '[CLS]'
+  - '[SEP]'
   - O
   - B-MISC
   - I-MISC
@@ -42,9 +45,6 @@ ner:
   - I-MONEY
   - B-PERCENT
   - I-PERCENT
-  - X
-  - '[CLS]'
-  - '[SEP]'
   metric_meta:
   - MICRO_F1
   - MACRO_F1
@@ -59,10 +59,10 @@ nerall:
   dropout_p: 0.1
   enable_san: 2
   labels:
-  - O
   - X
   - '[CLS]'
   - '[SEP]'
+  - O
   - B-Airport
   - B-Constellation
   - B-Nationality
@@ -480,6 +480,9 @@ pos:
   dropout_p: 0.1
   enable_san: 2
   labels:
+  - X
+  - '[CLS]'
+  - '[SEP]'
   - O
   - '0'
   - "\u526F\u8A5E"
@@ -497,9 +500,6 @@ pos:
   - "\u63A5\u982D\u8F9E"
   - "\u9023\u4F53\u8A5E"
   - "\u672A\u5B9A\u7FA9\u8A9E"
-  - X
-  - '[CLS]'
-  - '[SEP]'
   metric_meta:
   - MICRO_F1
   - MACRO_F1

@@ -48,13 +48,20 @@ def eval_model(model, data, metric_meta, use_cuda=True, with_label=True):
         scores.extend(score)
         ids.extend(batch_meta['uids'])
 
+    # remove ["O", "X", "[CLS]", "[SEP]"] from evaluation
+    # all task must add labels in the order below
+    # LabelMapper.add("X")
+    # LabelMapper.add("[CLS]")
+    # LabelMapper.add("[SEP]")
+    # LabelMapper.add("O")
+    use_indices = [p > 2 for p in _flatten_list(predictions)]
     if with_label:
         for mm in metric_meta:
             metric_name = mm.name
             metric_func = METRIC_FUNC[mm]
             metric = metric_func(
-                _flatten_list(predictions),
-                _flatten_list(golds)
+                _flatten_list(predictions)[use_indices],
+                _flatten_list(golds)[use_indices]
             )
             metrics[metric_name] = metric
     return metrics, predictions, scores, golds, ids
