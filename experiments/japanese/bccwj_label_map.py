@@ -433,6 +433,13 @@ NERALLLabelMapper.add('I-N_Person')
 NERALLLabelMapper.add('B-Military')
 NERALLLabelMapper.add('I-Percent')
 
+ChunkingLabelMapper = Vocabulary(True)
+ChunkingLabelMapper.add("O")
+ChunkingLabelMapper.add("X")
+ChunkingLabelMapper.add("[CLS]")
+ChunkingLabelMapper.add("[SEP]")
+ChunkingLabelMapper.add("B-NP")
+ChunkingLabelMapper.add("I-NP")
 
 POSLabelMapper = Vocabulary(True)
 POSLabelMapper.add("O")
@@ -459,17 +466,20 @@ POSLabelMapper.add("[SEP]")
 GLOBAL_MAP = {
     'ner': NERLabelMapper,
     'nerall': NERALLLabelMapper,
+    'chunking': ChunkingLabelMapper,
     'pos': POSLabelMapper,
 }
 
 METRIC_META = {
     'ner': [7, 8, 9, 10, 11, 12],
     'nerall': [7, 8, 9, 10, 11, 12],
+    'chunking': [7, 8, 9, 10, 11, 12],
     'pos': [7, 8, 9, 10, 11, 12],
 }
 
 SAN_META = {
     'ner': 2,
     'nerall': 2,
+    'chunking': 2,
     'pos': 2,
 }

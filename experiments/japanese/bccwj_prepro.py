@@ -8,7 +8,7 @@ path.append(os.getcwd())
 from pytorch_pretrained_bert.tokenization import BertTokenizer
 
 from data_utils.log_wrapper import create_logger
-from experiments.japanese.bccwj_label_map import NERLabelMapper, NERALLLabelMapper, POSLabelMapper
+from experiments.japanese.bccwj_label_map import NERLabelMapper, NERALLLabelMapper, ChunkingLabelMapper, POSLabelMapper
 
 logger = create_logger(__name__, to_disk=True, log_file='glue_prepro.log')
 
@@ -51,6 +51,8 @@ def load_ner(file, eos='。'):
     return rows
 
 
+# TODO: input data が違うものが混ざっていて記憶力で task 指定してカバーしてるので厳しい
+# ファイル分けるなりスクリプト中でファイル名指定するなりする
 def load_nerall(file, eos='。'):
     """Loading data of bccwj with all ner labels
     """
@@ -78,6 +80,34 @@ def load_nerall(file, eos='。'):
     return rows
 
 
+def load_chunking(file, eos='。'):
+    """Loading data of bccwj with all ner labels
+    """
+    rows = []
+    cnt = 0
+    with open(file, encoding="utf8") as f:
+        words = []
+        labels = []
+        for line in f:
+            contents = line.strip()
+            if contents.startswith("-DOCSTART-") or len(contents) == 0:
+                    continue
+
+            if len(words) > 0 and words[-1] == eos:
+                sample = {'uid': str(cnt), 'premise': words, 'label': labels}
+                rows.append(sample)
+                cnt += 1
+                words = []
+                labels = []
+            else:
+                if len(contents.split(' ')) == 4:
+                    word = contents.split(' ')[0]
+                    label = contents.split(' ')[-2]
+                    words.append(word)
+                    labels.append(label)
+    return rows
+
+
 def load_pos(file, eos='。'):
     """Loading data of bccwj with POS labels
     """
@@ -98,7 +128,7 @@ def load_pos(file, eos='。'):
                 words = []
                 labels = []
             else:
-                if len(contents.split(' ')) == 3:
+                if len(contents.split(' ')) == 4:
                     word = contents.split(' ')[0]
                     label = contents.split(' ')[1]
                     words.append(word)
@@ -143,7 +173,7 @@ def main(args):
 
     tasks = args.tasks.split(',')
     for t in tasks:
-        if not t in ['ner', 'pos', 'nerall']:
+        if not t in ['ner', 'pos', 'nerall', 'chunking']:
             sys.exit(f'invalid task name: {t}')
 
     train_path = os.path.join(root, 'train.txt')
@@ -195,6 +225,28 @@ def main(args):
         build_data(dev_data, dev_fout, tokenizer, NERALLLabelMapper, args.max_seq_len)
         build_data(test_data, test_fout, tokenizer, NERALLLabelMapper, args.max_seq_len)
         logger.info('done with NERALL')
+
+    ############
+    # CHUNKING
+    ############
+    if 'chunking' in tasks:
+        # load
+        train_data = load_chunking(train_path)
+        dev_data = load_chunking(dev_path)
+        test_data = load_chunking(test_path)
+        logger.info('Loaded {} Chunking train samples'.format(len(train_data)))
+        logger.info('Loaded {} Chunking dev samples'.format(len(dev_data)))
+        logger.info('Loaded {} Chunking test samples'.format(len(test_data)))
+
+        # build
+        train_fout = os.path.join(root, 'chunking_train.json')
+        dev_fout = os.path.join(root, 'chunking_dev.json')
+        test_fout = os.path.join(root, 'chunking_test.json')
+
+        build_data(train_data, train_fout, tokenizer, ChunkingLabelMapper, args.max_seq_len)
+        build_data(dev_data, dev_fout, tokenizer, ChunkingLabelMapper, args.max_seq_len)
+        build_data(test_data, test_fout, tokenizer, ChunkingLabelMapper, args.max_seq_len)
+        logger.info('done with Chunking')
 
     ############
     # POS Tagging

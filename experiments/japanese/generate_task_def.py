@@ -9,9 +9,10 @@ task_def_dic = {}
 dropout_p_map = {
     "ner": 0.1,
     "nerall": 0.1,
+    "chunking": 0.1,
     "pos": 0.1
 }
-for task in ['ner', 'nerall', 'pos']:
+for task in ['ner', 'nerall', 'chunking', 'pos']:
     task_type = TaskType.SequenceLabeling
     data_format = DataFormat.PremiseOnly
 

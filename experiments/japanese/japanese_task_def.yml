@@ -1,3 +1,23 @@
+chunking:
+  data_format: PremiseOnly
+  dropout_p: 0.1
+  enable_san: 2
+  labels:
+  - O
+  - X
+  - '[CLS]'
+  - '[SEP]'
+  - B-NP
+  - I-NP
+  metric_meta:
+  - MICRO_F1
+  - MACRO_F1
+  - MICRO_Precision
+  - MACRO_Precision
+  - MICRO_Recall
+  - MACRO_Recall
+  n_class: 6
+  task_type: SequenceLabeling
 ner:
   data_format: PremiseOnly
   dropout_p: 0.1
