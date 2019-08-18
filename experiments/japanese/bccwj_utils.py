@@ -1,4 +1,5 @@
 # Copyright (c) Microsoft. All rights reserved.
+import numpy as np
 from random import shuffle
 from data_utils.metrics import Metric, METRIC_FUNC
 from data_utils.task_def import DataFormat
@@ -60,8 +61,8 @@ def eval_model(model, data, metric_meta, use_cuda=True, with_label=True):
             metric_name = mm.name
             metric_func = METRIC_FUNC[mm]
             metric = metric_func(
-                _flatten_list(predictions)[use_indices],
-                _flatten_list(golds)[use_indices]
+                np.array(_flatten_list(predictions))[use_indices],
+                np.array(_flatten_list(golds))[use_indices]
             )
             metrics[metric_name] = metric
     return metrics, predictions, scores, golds, ids
