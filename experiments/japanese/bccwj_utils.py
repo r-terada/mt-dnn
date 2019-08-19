@@ -1,5 +1,6 @@
 # Copyright (c) Microsoft. All rights reserved.
 import numpy as np
+from sklearn.metrics import classification_report
 from random import shuffle
 from data_utils.metrics import Metric, METRIC_FUNC
 from data_utils.task_def import DataFormat
@@ -57,6 +58,11 @@ def eval_model(model, data, metric_meta, use_cuda=True, with_label=True):
     # LabelMapper.add("O")
     use_indices = [p > 3 for p in _flatten_list(predictions)]
     if with_label:
+        if any(use_indices):
+            print(classification_report(
+                np.array(_flatten_list(golds))[use_indices],
+                np.array(_flatten_list(predictions))[use_indices],
+            ))
         for mm in metric_meta:
             metric_name = mm.name
             metric_func = METRIC_FUNC[mm]

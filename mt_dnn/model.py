@@ -215,7 +215,7 @@ class MTDNNModel(object):
             score = score.reshape(-1).tolist()
             return score, predict, batch_meta['true_label']
         else:
-            if task_type == TaskType.Classification:
+            if task_type in [TaskType.Classification, TaskType.SequenceLabeling]:
                 score = F.softmax(score, dim=1)
             score = score.data.cpu()
             score = score.numpy()
@@ -244,7 +244,6 @@ class MTDNNModel(object):
         logger.info('model saved to {}'.format(filename))
 
     def load(self, checkpoint):
-
         model_state_dict = torch.load(checkpoint)
         if model_state_dict['config']['init_checkpoint'].rsplit('/', 1)[1] != \
                 self.config['init_checkpoint'].rsplit('/', 1)[1]:
