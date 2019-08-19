@@ -56,7 +56,7 @@ def eval_model(model, data, metric_meta, use_cuda=True, with_label=True):
     # LabelMapper.add("[CLS]")
     # LabelMapper.add("[SEP]")
     # LabelMapper.add("O")
-    use_indices = [p > 3 for p in _flatten_list(predictions)]
+    use_indices = [label > 3 for label in _flatten_list(golds)]
     if with_label:
         if any(use_indices):
             print(classification_report(
