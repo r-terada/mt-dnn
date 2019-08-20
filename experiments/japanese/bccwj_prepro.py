@@ -100,7 +100,7 @@ def load_chunking(file, eos='。'):
                 words = []
                 labels = []
             else:
-                if len(contents.split(' ')) == 4:
+                if len(contents.split(' ')) == 5:
                     word = contents.split(' ')[0]
                     label = contents.split(' ')[2]
                     words.append(word)
@@ -128,7 +128,7 @@ def load_pos(file, eos='。'):
                 words = []
                 labels = []
             else:
-                if len(contents.split(' ')) == 4:
+                if len(contents.split(' ')) == 5:
                     word = contents.split(' ')[0]
                     label = contents.split(' ')[1]
                     words.append(word)
@@ -159,7 +159,11 @@ def build_data(data, dump_path, tokenizer, label_mapper, max_seq_len=128):
                 labels = labels[:max_seq_len - 2]
 
             labels = ['[CLS]'] + labels[:max_seq_len - 2] + ['[SEP]']
-            label = [label_mapper[lab] for lab in labels]
+            label = [label_mapper[lab] if lab in label_mapper else 0 for lab in labels]
+            if None in label:
+                print(tokens)
+                print(label)
+                print(labels)
             input_ids = tokenizer.convert_tokens_to_ids(['[CLS]'] + tokens + ['[SEP]'])
             assert len(label) == len(input_ids)
             type_ids = [0] * ( len(tokens) + 2)
