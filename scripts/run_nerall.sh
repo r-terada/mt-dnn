@@ -3,7 +3,7 @@ if [[ $# -ne 2 ]]; then
   echo "run_ner.sh <batch_size> <gpu>"
   exit 1
 fi
-prefix="mt-dnn-ner-ene"
+prefix="mt-dnn-nerall"
 BATCH_SIZE=$1
 gpu=$2
 echo "export CUDA_VISIBLE_DEVICES=${gpu}"
@@ -14,7 +14,7 @@ train_datasets="nerall"
 test_datasets="nerall"
 MODEL_ROOT="checkpoints"
 
-BERT_PATH="mt_dnn_models/Japanese_L-12_H-768_A-12_E-30_BPE/pytorch_model.bin"
+BERT_PATH="mt_dnn_models/Japanese_L-12_H-768_A-12_E-30_BPE/"
 BERT_CONFIG_PATH="mt_dnn_models/Japanese_L-12_H-768_A-12_E-30_BPE/bert_config.json"
 DATA_DIR="data/bccwj_all_class"
 TASK_DEF_PATH="experiments/japanese/japanese_task_def.yml"

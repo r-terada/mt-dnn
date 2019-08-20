@@ -21,12 +21,12 @@ logger = logging.getLogger(__name__)
 
 
 class MTDNNModel(object):
-    def __init__(self, opt, state_dict=None, num_train_step=-1):
+    def __init__(self, opt, bert_init_checkpoint=None, state_dict=None, num_train_step=-1):
         self.config = opt
         self.updates = state_dict['updates'] if state_dict and 'updates' in state_dict else 0
         self.local_updates = 0
         self.train_loss = AverageMeter()
-        self.network = SANBertNetwork(opt)
+        self.network = SANBertNetwork(opt, bert_init_checkpoint=bert_init_checkpoint)
 
         if state_dict:
             self.network.load_state_dict(state_dict['state'], strict=False)

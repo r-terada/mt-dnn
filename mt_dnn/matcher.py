@@ -9,11 +9,14 @@ from module.san import SANClassifier
 
 
 class SANBertNetwork(nn.Module):
-    def __init__(self, opt, bert_config=None):
+    def __init__(self, opt, bert_config=None, bert_init_checkpoint=None):
         super(SANBertNetwork, self).__init__()
         self.dropout_list = nn.ModuleList()
         self.bert_config = BertConfig.from_dict(opt)
-        self.bert = BertModel(self.bert_config)
+        if bert_init_checkpoint:
+            self.bert = BertModel.from_pretrained(bert_init_checkpoint)
+        else:
+            self.bert = BertModel(self.bert_config)
         if opt.get('dump_feature', False):
             self.opt = opt
             return
@@ -39,7 +42,7 @@ class SANBertNetwork(nn.Module):
                 self.scoring_list.append(out_proj)
 
         self.opt = opt
-        self._my_init()
+        # self._my_init()
         self.set_embed(opt)
 
     def _my_init(self):

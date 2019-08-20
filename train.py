@@ -277,7 +277,7 @@ def main():
         config = BertConfig(vocab_size_or_config_json_file=30522).to_dict()
         opt.update(config)
 
-    model = MTDNNModel(opt, state_dict=state_dict, num_train_step=num_all_batches)
+    model = MTDNNModel(opt, bert_init_checkpoint=args.init_checkpoint, state_dict=state_dict, num_train_step=num_all_batches)
     if args.resume and args.model_ckpt:
         logger.info('loading model from {}'.format(args.model_ckpt))
         model.load(args.model_ckpt)
