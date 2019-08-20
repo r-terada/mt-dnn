@@ -102,7 +102,7 @@ def load_chunking(file, eos='。'):
             else:
                 if len(contents.split(' ')) == 4:
                     word = contents.split(' ')[0]
-                    label = contents.split(' ')[-2]
+                    label = contents.split(' ')[2]
                     words.append(word)
                     labels.append(label)
     return rows
