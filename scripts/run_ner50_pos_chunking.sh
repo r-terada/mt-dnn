@@ -22,7 +22,7 @@ TASK_DEF_PATH="experiments/japanese/japanese_task_def.yml"
 optim="adamax"
 grad_clipping=0
 global_grad_clipping=1
-lr="2e-5"
+lr="5e-5"
 
 model_dir="checkpoints/${prefix}_${optim}_gc${grad_clipping}_ggc${global_grad_clipping}_${tstr}"
 log_file="${model_dir}/log.log"
