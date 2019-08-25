@@ -21,12 +21,12 @@ logger = logging.getLogger(__name__)
 
 
 class MTDNNModel(object):
-    def __init__(self, opt, state_dict=None, num_train_step=-1):
+    def __init__(self, opt, bert_init_checkpoint=None, state_dict=None, num_train_step=-1):
         self.config = opt
         self.updates = state_dict['updates'] if state_dict and 'updates' in state_dict else 0
         self.local_updates = 0
         self.train_loss = AverageMeter()
-        self.network = SANBertNetwork(opt)
+        self.network = SANBertNetwork(opt, bert_init_checkpoint=bert_init_checkpoint)
 
         if state_dict:
             self.network.load_state_dict(state_dict['state'], strict=False)
@@ -147,6 +147,9 @@ class MTDNNModel(object):
                 weight = Variable(batch_data[batch_meta['factor']])
             if task_type == TaskType.Regression:
                 loss = torch.mean(F.mse_loss(logits.squeeze(), y, reduce=False) * weight)
+            elif task_type == TaskType.SequenceLabeling:
+                y = y.view(-1)
+                loss = torch.mean(F.cross_entropy(logits, y, reduce=False) * weight)
             else:
                 loss = torch.mean(F.cross_entropy(logits, y, reduce=False) * weight)
                 if soft_labels is not None:
@@ -157,6 +160,9 @@ class MTDNNModel(object):
         else:
             if task_type == TaskType.Regression:
                 loss = F.mse_loss(logits.squeeze(), y)
+            elif task_type == TaskType.SequenceLabeling:
+                y = y.view(-1)
+                loss = F.cross_entropy(logits, y, ignore_index=-1)
             else:
                 loss = F.cross_entropy(logits, y)
                 if soft_labels is not None:
@@ -209,7 +215,7 @@ class MTDNNModel(object):
             score = score.reshape(-1).tolist()
             return score, predict, batch_meta['true_label']
         else:
-            if task_type == TaskType.Classification:
+            if task_type in [TaskType.Classification, TaskType.SequenceLabeling]:
                 score = F.softmax(score, dim=1)
             score = score.data.cpu()
             score = score.numpy()
@@ -238,7 +244,6 @@ class MTDNNModel(object):
         logger.info('model saved to {}'.format(filename))
 
     def load(self, checkpoint):
-
         model_state_dict = torch.load(checkpoint)
         if model_state_dict['config']['init_checkpoint'].rsplit('/', 1)[1] != \
                 self.config['init_checkpoint'].rsplit('/', 1)[1]:
