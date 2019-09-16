@@ -11,9 +11,9 @@ class TaskDefs:
         data_type_map = {}
         task_type_map = {}
         metric_meta_map = {}
-        enable_san_map = {}
+        enable_san_map ={}
+        decoder_opt_map = {}
         dropout_p_map = {}
-        encoderType_map = {}
         uniq_encoderType = set()
         for task, task_def in self._task_def_dic.items():
             assert "_" not in task, "task name should not contain '_', current task name: %s" % task
@@ -22,8 +22,14 @@ class TaskDefs:
             data_type_map[task] = data_format
             task_type_map[task] = TaskType[task_def["task_type"]]
             metric_meta_map[task] = tuple(Metric[metric_name] for metric_name in task_def["metric_meta"])
-            enable_san_map[task] = task_def["enable_san"]
-            uniq_encoderType.add(EncoderModelType[task_def["encoder_type"]])
+            if "decoder_opt" in task_def:
+                decoder_opt_map[task] = task_def["decoder_opt"]
+            if "san_meta" in task_def:
+                enable_san_map[task] = task_def["decoder_opt"]
+            if "encoder_type" in task_def:
+                uniq_encoderType.add(EncoderModelType[task_def["encoder_type"]])
+            else:
+                uniq_encoderType.add(EncoderModelType.BERT)
             if "labels" in task_def:
                 labels = task_def["labels"]
                 label_mapper = Vocabulary(True)
@@ -40,5 +46,6 @@ class TaskDefs:
         self.task_type_map = task_type_map
         self.metric_meta_map = metric_meta_map
         self.enable_san_map = enable_san_map
+        self.decoder_opt_map = decoder_opt_map
         self.dropout_p_map = dropout_p_map
         self.encoderType = uniq_encoderType.pop()

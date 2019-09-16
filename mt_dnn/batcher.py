@@ -167,6 +167,12 @@ class BatchGen:
                 labels = [sample['label'] for sample in batch]
                 if self.task_type == TaskType.Regression:
                     batch_data.append(torch.FloatTensor(labels))
+                elif self.task_type == TaskType.SequenceLabeling:
+                    tlab = torch.LongTensor(batch_size, tok_len).fill_(-1)
+                    for i, label in enumerate(labels):
+                        ll = len(label)
+                        tlab[i, :ll] = torch.LongTensor(label)
+                    batch_data.append(tlab)
                 else:
                     batch_data.append(torch.LongTensor(labels))
                 batch_info['label'] = current_idx

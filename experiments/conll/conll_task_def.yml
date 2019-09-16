@@ -1,0 +1,25 @@
+ner:
+  data_format: PremiseOnly
+  decoder_opt: 2
+  labels:
+  - X
+  - '[CLS]'
+  - '[SEP]'
+  - O
+  - B-MISC
+  - I-MISC
+  - B-PER
+  - I-PER
+  - B-ORG
+  - I-ORG
+  - B-LOC
+  - I-LOC
+  metric_meta:
+  - MICRO_F1
+  - MACRO_F1
+  - MICRO_Precision
+  - MACRO_Precision
+  - MICRO_Recall
+  - MACRO_Recall
+  n_class: 12
+  task_type: SequenceLabeling

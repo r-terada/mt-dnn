@@ -11,7 +11,8 @@ from pytorch_pretrained_bert.modeling import BertConfig
 from tensorboardX import SummaryWriter
 #from torch.utils.tensorboard import SummaryWriter
 from experiments.exp_def import TaskDefs
-from experiments.glue.glue_utils import submit, eval_model
+# from experiments.glue.glue_utils import submit, eval_model
+from experiments.conll.conll_utils import eval_model
 from data_utils.log_wrapper import create_logger
 from data_utils.utils import set_environment
 from data_utils.task_def import TaskType, EncoderModelType
@@ -184,7 +185,13 @@ def main():
         if task_type == TaskType.Ranking:
             pw_task = True
 
-        dopt = generate_decoder_opt(task_defs.enable_san_map[prefix], opt['answer_opt'])
+        dopt = None
+        if prefix in task_defs.enable_san_map:
+            dopt = generate_decoder_opt(task_defs.enable_san_map[prefix], opt['answer_opt'])
+        if prefix in task_defs.decoder_opt_map:
+            dopt = task_defs.decoder_opt_map[prefix]
+        assert dopt is not None, "decoder_opt or enable_san must be specified in task defs"
+
         if task_id < len(decoder_opts):
             decoder_opts[task_id] = min(decoder_opts[task_id], dopt)
         else:
@@ -389,6 +396,7 @@ def main():
                 dev_metrics, dev_predictions, scores, golds, dev_ids= eval_model(model,
                                                                                  dev_data,
                                                                                  metric_meta=task_defs.metric_meta_map[prefix],
+                                                                                 vocab=label_dict,
                                                                                  use_cuda=args.cuda)
                 for key, val in dev_metrics.items():
                     if args.tensorboard:
@@ -397,21 +405,22 @@ def main():
                 score_file = os.path.join(output_dir, '{}_dev_scores_{}.json'.format(dataset, epoch))
                 results = {'metrics': dev_metrics, 'predictions': dev_predictions, 'uids': dev_ids, 'scores': scores}
                 dump(score_file, results)
-                official_score_file = os.path.join(output_dir, '{}_dev_scores_{}.tsv'.format(dataset, epoch))
-                submit(official_score_file, results, label_dict)
+                # official_score_file = os.path.join(output_dir, '{}_dev_scores_{}.tsv'.format(dataset, epoch))
+                # submit(official_score_file, results, label_dict)
 
             # test eval
             test_data = test_data_list[idx]
             if test_data is not None:
                 test_metrics, test_predictions, scores, golds, test_ids= eval_model(model, test_data,
                                                                                     metric_meta=task_defs.metric_meta_map[prefix],
+                                                                                    vocab=label_dict,
                                                                                     use_cuda=args.cuda, with_label=False)
                 score_file = os.path.join(output_dir, '{}_test_scores_{}.json'.format(dataset, epoch))
                 results = {'metrics': test_metrics, 'predictions': test_predictions, 'uids': test_ids, 'scores': scores}
                 dump(score_file, results)
                 official_score_file = os.path.join(output_dir, '{}_test_scores_{}.tsv'.format(dataset, epoch))
-                submit(official_score_file, results, label_dict)
-                logger.info('[new test scores saved.]')
+                # submit(official_score_file, results, label_dict)
+                # logger.info('[new test scores saved.]')
 
         model_file = os.path.join(output_dir, 'model_{}.pt'.format(epoch))
         model.save(model_file)

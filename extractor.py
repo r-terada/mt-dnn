@@ -105,7 +105,7 @@ def model_config(parser):
     parser.add_argument('--answer_dropout_p', type=float, default=0.1)
     parser.add_argument('--answer_weight_norm_on', action='store_true')
     parser.add_argument('--dump_state_on', action='store_true')
-    parser.add_argument('--answer_opt', type=int, default=0, help='0,1')
+    parser.add_argument('--answer_opt', type=int, default=0, help='0,1,2')
     parser.add_argument('--label_size', type=str, default='3')
     parser.add_argument('--mtl_opt', type=int, default=0)
     parser.add_argument('--ratio', type=float, default=0)

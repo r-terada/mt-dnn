@@ -98,6 +98,10 @@ class SANBertNetwork(nn.Module):
             assert hyp_mask is not None
             hyp_mem = sequence_output[:, :max_query, :]
             logits = self.scoring_list[task_id](sequence_output, hyp_mem, premise_mask, hyp_mask)
+        elif decoder_opt == 2:
+            output = self.dropout_list[task_id](sequence_output)
+            output = output.view(-1, output.size(2))
+            logits = self.scoring_list[task_id](output)
         else:
             pooled_output = self.dropout_list[task_id](pooled_output)
             logits = self.scoring_list[task_id](pooled_output)

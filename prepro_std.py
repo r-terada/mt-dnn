@@ -188,7 +188,7 @@ def roberta_feature_extractor(
     return input_ids, input_mask, segment_ids
 
 
-def build_data(data, dump_path, tokenizer, data_format=DataFormat.PremiseOnly,
+def build_data(data, dump_path, tokenizer, task_type, data_format=DataFormat.PremiseOnly,
                max_seq_len=MAX_SEQ_LEN, encoderModelType=EncoderModelType.BERT):
     def build_data_premise_only(
             data, dump_path, max_seq_len=MAX_SEQ_LEN, tokenizer=None, is_bert_model=True):
@@ -227,6 +227,20 @@ def build_data(data, dump_path, tokenizer, data_format=DataFormat.PremiseOnly,
                         'label': label,
                         'token_id': input_ids,
                         'type_id': type_ids}
+
+                if task_type == TaskType.SequenceLabeling:
+                    labels = []
+                    for i, word in enumerate(premise.split()):
+                        _tokens = tokenizer.tokenize(word)
+                        for j in range(len(_tokens)):
+                            if j == 0:
+                                labels.append(label[i])
+                            else:
+                                labels.append(0)  # 0 = 'X'
+                    # 1 = '[CLS]' 2 = '[SEP]'
+                    labels = [1] + labels[:max_seq_len - 2] + [2]
+                    features['label'] = labels
+
                 writer.write('{}\n'.format(json.dumps(features)))
 
     def build_data_premise_and_one_hypo(
@@ -333,7 +347,7 @@ def load_data(file_path, data_format, task_type, label_dict=None):
     :param data_format:
     :param task_type:
     :param label_dict: map string label to numbers.
-        only valid for Classification task or ranking task.
+        only valid for Classification task, sequence labeling task or ranking task.
         For ranking task, better label should have large number
     :return:
     """
@@ -375,6 +389,10 @@ def load_data(file_path, data_format, task_type, label_dict=None):
                 labels = [float(label) for label in labels]
             row["label"] = int(np.argmax(labels))
             row["olabel"] = labels
+        elif task_type == TaskType.SequenceLabeling:
+            labels = row["label"].split(" ")
+            labels = [label_dict[label] for label in labels]
+            row["label"] = labels
 
         rows.append(row)
     return rows
@@ -466,6 +484,7 @@ def main(args):
                 rows,
                 dump_path,
                 tokenizer,
+                task_type,
                 data_format,
                 encoderModelType=encoder_model)
 
