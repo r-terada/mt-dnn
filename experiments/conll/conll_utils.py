@@ -1,11 +1,11 @@
 import numpy as np
 from random import shuffle
-from functools import reduce
+from functools import reduce, partial
 from data_utils.task_def import DataFormat
 from data_utils.metrics import METRIC_FUNC
 
 
-def load_ner(file):
+def load_conll(file, label_field):
     rows = []
     cnt = 0
     with open(file, encoding="utf8") as f:
@@ -26,11 +26,16 @@ def load_ner(file):
                 labels = []
             else:
                 word = contents.split(' ')[0]
-                label = contents.split(' ')[-1]
+                label = contents.split(' ')[label_field]
                 words.append(word)
                 labels.append(label)
 
     return rows
+
+
+load_ner = partial(load_conll, label_field=3)
+load_chunking = partial(load_conll, label_field=2)
+load_pos = partial(load_conll, label_field=1)
 
 
 def dump_rows(rows, out_path):
