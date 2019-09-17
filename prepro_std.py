@@ -57,6 +57,12 @@ class RoBERTaTokenizer(object):
         self.vocab = vocab
         self.encoder = encoder
 
+    def encode_word(self, word):
+        ids = self.encoder.encode(word)
+        ids = list(map(str, ids))
+        ids = [self.vocab[w] if w in self.vocab else self.vocab['<unk>'] for w in ids]
+        return ids
+
     def encode(self, text):
         ids = self.encoder.encode(text)
         ids = list(map(str, ids))
@@ -188,6 +194,14 @@ def roberta_feature_extractor(
     return input_ids, input_mask, segment_ids
 
 
+def roberta_sequence_tagging_feature_extractor(
+    word, max_seq_length=512, model=None):
+    input_ids = model.encode_word(word)
+    segment_ids = [0] * len(input_ids)
+    input_mask = None
+    return input_ids, input_mask, segment_ids
+
+
 def build_data(data, dump_path, tokenizer, task_type, data_format=DataFormat.PremiseOnly,
                max_seq_len=MAX_SEQ_LEN, encoderModelType=EncoderModelType.BERT):
     def build_data_premise_only(
@@ -202,14 +216,33 @@ def build_data(data, dump_path, tokenizer, task_type, data_format=DataFormat.Pre
                 if len(premise) > max_seq_len - 2:
                     premise = premise[:max_seq_len - 2]
                 if encoderModelType == EncoderModelType.ROBERTA:
-                    input_ids, input_mask, type_ids = roberta_feature_extractor(
-                        premise, max_seq_length=max_seq_len, model=tokenizer)
+                    if task_type == TaskType.SequenceLabeling:
+                        labels = []
+                        input_ids = []
+                        for i, word in enumerate(premise.split()):
+                            _input_ids, _input_mask, _type_ids = roberta_sequence_tagging_feature_extractor(
+                                word, max_seq_length=max_seq_len, model=tokenizer)
+                            input_ids.extend(_input_ids)
+                            for j in range(len(_input_ids)):
+                                if j == 0:
+                                    labels.append(label[i])
+                                else:
+                                    labels.append(0)  # 0 = 'X'
+                        # 1 = '[CLS]' 2 = '[SEP]'
+                        labels = [1] + labels[:max_seq_len - 2] + [2]
+                        input_ids = [0] + input_ids[:max_seq_len - 2] + [2]
+                        assert len(labels) == len(input_ids)
+                        type_ids = [0 for _ in range(len(input_ids))]
+                    else:
+                        input_ids, input_mask, type_ids = roberta_feature_extractor(
+                            premise, max_seq_length=max_seq_len, model=tokenizer)
+                        labels = label
                     features = {
                         'uid': ids,
-                        'label': label,
+                        'label': labels,
                         'token_id': input_ids,
                         'type_id': type_ids,
-                        'mask': input_mask}
+                        'mask': None}
                 elif encoderModelType == EncoderModelType.XLNET:
                     input_ids, input_mask, type_ids = xlnet_feature_extractor(
                         premise, max_seq_length=max_seq_len, tokenize_fn=tokenizer)
@@ -228,18 +261,18 @@ def build_data(data, dump_path, tokenizer, task_type, data_format=DataFormat.Pre
                         'token_id': input_ids,
                         'type_id': type_ids}
 
-                if task_type == TaskType.SequenceLabeling:
-                    labels = []
-                    for i, word in enumerate(premise.split()):
-                        _tokens = tokenizer.tokenize(word)
-                        for j in range(len(_tokens)):
-                            if j == 0:
-                                labels.append(label[i])
-                            else:
-                                labels.append(0)  # 0 = 'X'
-                    # 1 = '[CLS]' 2 = '[SEP]'
-                    labels = [1] + labels[:max_seq_len - 2] + [2]
-                    features['label'] = labels
+                    if task_type == TaskType.SequenceLabeling:
+                        labels = []
+                        for i, word in enumerate(premise.split()):
+                            _tokens = tokenizer.tokenize(word)
+                            for j in range(len(_tokens)):
+                                if j == 0:
+                                    labels.append(label[i])
+                                else:
+                                    labels.append(0)  # 0 = 'X'
+                        # 1 = '[CLS]' 2 = '[SEP]'
+                        labels = [1] + labels[:max_seq_len - 2] + [2]
+                        features['label'] = labels
 
                 writer.write('{}\n'.format(json.dumps(features)))
 
