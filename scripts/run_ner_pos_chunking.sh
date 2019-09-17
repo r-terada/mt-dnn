@@ -3,7 +3,7 @@ if [[ $# -ne 2 ]]; then
   echo "train.sh <batch_size> <gpu>"
   exit 1
 fi
-prefix="mt-dnn-ner"
+prefix="bert-ner_pos_chunking"
 BATCH_SIZE=$1
 gpu=$2
 echo "export CUDA_VISIBLE_DEVICES=${gpu}"
