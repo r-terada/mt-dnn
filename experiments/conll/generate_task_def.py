@@ -3,10 +3,11 @@ from sys import path
 path.append(os.getcwd())
 
 from data_utils.metrics import Metric
-from data_utils.task_def import TaskType, DataFormat
+from data_utils.task_def import TaskType, DataFormat, EncoderModelType
 from experiments.conll.conll_label_map import DATA_TYPE, GLOBAL_MAP, TASK_TYPE, DATA_META, METRIC_META, DECODER_OPT
 
 task_def_dic = {}
+task_def_dic_xlnet = {}
 dropout_p_map = {}
 for task in TASK_TYPE.keys():
     task_type = TASK_TYPE[task]
@@ -29,7 +30,11 @@ for task in TASK_TYPE.keys():
     }
 
     task_def_dic[task] = task_def
+    task_def_xlnet = task_def.copy()
+    task_def_xlnet['encoder_type'] = EncoderModelType.XLNET.name
+    task_def_dic_xlnet[task] = task_def_xlnet
 
 import yaml
 
 yaml.safe_dump(task_def_dic, open("experiments/conll/conll_task_def.yml", "w"))
+yaml.safe_dump(task_def_dic_xlnet, open("experiments/conll/conll_task_def_xlnet.yml", "w"))
