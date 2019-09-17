@@ -44,7 +44,7 @@ def model_config(parser):
     parser.add_argument('--mtl_opt', type=int, default=0)
     parser.add_argument('--ratio', type=float, default=0)
     parser.add_argument('--mix_opt', type=int, default=0)
-    parser.add_argument('--max_seq_len', type=int, default=512)
+    parser.add_argument('--max_seq_len', type=int, default=256)
     parser.add_argument('--init_ratio', type=float, default=1)
     parser.add_argument('--encoder_type', type=int, default=EncoderModelType.BERT)
 

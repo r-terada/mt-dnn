@@ -15,7 +15,7 @@ from data_utils.xlnet_utils import preprocess_text, encode_ids
 from data_utils.xlnet_utils import CLS_ID, SEP_ID
 
 DEBUG_MODE = False
-MAX_SEQ_LEN = 512
+MAX_SEQ_LEN = 256
 
 ### XLNET ###
 SEG_ID_A = 0
