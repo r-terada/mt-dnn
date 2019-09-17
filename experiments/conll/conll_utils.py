@@ -58,7 +58,7 @@ def _flatten_list(l):
     return reduce(lambda a, b: a + b, l)
 
 
-def eval_model(model, data, metric_meta, vocab, use_cuda=True, with_label=True, beam_search=True, beam_width=5, export_file=None):
+def eval_model(model, data, metric_meta, vocab, use_cuda=True, with_label=True):
     label2id = vocab.tok2ind
     id2label = vocab.ind2tok
     n_labels = len(label2id)
@@ -111,4 +111,4 @@ def eval_model(model, data, metric_meta, vocab, use_cuda=True, with_label=True, 
                 np.array(_flatten_list(golds))[use_indices]
             )
             metrics[metric_name] = metric
-    return metrics, predictions, scores, golds, ids, inputs
+    return metrics, predictions, scores, golds, ids
