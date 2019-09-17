@@ -416,7 +416,7 @@ def main():
                     test_metrics, test_predictions, scores, golds, test_ids= eval_model(model, test_data,
                                                                                         metric_meta=task_defs.metric_meta_map[prefix],
                                                                                         vocab=label_dict,
-                                                                                        use_cuda=args.cuda, with_label=False)
+                                                                                        use_cuda=args.cuda)
                 score_file = os.path.join(output_dir, '{}_test_scores_{}.json'.format(dataset, epoch))
                 results = {'metrics': test_metrics, 'predictions': test_predictions, 'uids': test_ids, 'scores': scores}
                 dump(score_file, results)
