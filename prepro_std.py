@@ -157,6 +157,14 @@ def xlnet_feature_extractor(
     return input_ids, input_mask, segment_ids
 
 
+def xlnet_sequence_tagging_feature_extractor(
+        word, max_seq_length=512, tokenize_fn=None):
+    tokens = xlnet_tokenize_fn(word, tokenize_fn)
+    segment_ids = [SEG_ID_A] * len(tokens)
+    input_mask = [0] * len(tokens)
+    return tokens, input_mask, segment_ids
+
+
 def bert_feature_extractor(
         text_a, text_b=None, max_seq_length=512, tokenize_fn=None):
     tokens_a = tokenize_fn.tokenize(text_a)
@@ -244,11 +252,37 @@ def build_data(data, dump_path, tokenizer, task_type, data_format=DataFormat.Pre
                         'type_id': type_ids,
                         'mask': None}
                 elif encoderModelType == EncoderModelType.XLNET:
-                    input_ids, input_mask, type_ids = xlnet_feature_extractor(
-                        premise, max_seq_length=max_seq_len, tokenize_fn=tokenizer)
+                    if task_type == TaskType.SequenceLabeling:
+                        labels = []
+                        input_ids = []
+                        for i, word in enumerate(premise.split()):
+                            _input_ids, _input_mask, _type_ids = xlnet_sequence_tagging_feature_extractor(
+                                word, max_seq_length=max_seq_len, tokenize_fn=tokenizer)
+                            input_ids.extend(_input_ids)
+                            for j in range(len(_input_ids)):
+                                if j == 0:
+                                    labels.append(label[i])
+                                else:
+                                    labels.append(0)  # 0 = 'X'
+                        # 1 = '[CLS]' 2 = '[SEP]'
+                        labels = [1] + labels[:max_seq_len - 2] + [2]
+                        input_ids = [CLS_ID] + input_ids[:max_seq_len - 2] + [SEP_ID]
+                        assert len(labels) == len(input_ids)
+                        type_ids = [SEG_ID_A for _ in range(len(input_ids))]
+                        input_mask = [0 for _ in range(len(input_ids))]
+                        if len(input_ids) < max_seq_len:
+                            delta_len = max_seq_len - len(input_ids)
+                            input_ids = [0] * delta_len + input_ids
+                            labels = [0] * delta_len + labels
+                            input_mask = [1] * delta_len + input_mask
+                            type_ids = [SEG_ID_PAD] * delta_len + type_ids
+                    else:
+                        input_ids, input_mask, type_ids = xlnet_feature_extractor(
+                            premise, max_seq_length=max_seq_len, tokenize_fn=tokenizer)
+                        labels = label
                     features = {
                         'uid': ids,
-                        'label': label,
+                        'label': labels,
                         'token_id': input_ids,
                         'type_id': type_ids,
                         'mask': input_mask}
