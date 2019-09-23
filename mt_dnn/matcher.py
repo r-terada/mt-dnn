@@ -29,6 +29,13 @@ class SANBertNetwork(nn.Module):
             self.bert = RobertaModel.from_pretrained(opt['init_checkpoint'])
             hidden_size = self.bert.args.encoder_embed_dim
             self.pooler = LinearPooler(hidden_size)
+        elif opt['encoder_type'] == EncoderModelType.XLNET:
+            from pytorch_transformers import XLNetModel, XLNetConfig
+            self.bert_config = XLNetConfig.from_dict(opt)
+            # TODO: can't load model from checkpoint with
+            #   RuntimeError: Trying to create tensor with negative dimension -1: [-1, 1024]
+            # fix it later
+            self.bert = XLNetModel.from_pretrained('xlnet-large-cased', config=self.bert_config)
         else: 
             self.bert_config = BertConfig.from_dict(opt)
             self.bert = BertModel(self.bert_config)
@@ -82,10 +89,12 @@ class SANBertNetwork(nn.Module):
 
         self.apply(init_weights)
 
-    def forward(self, input_ids, token_type_ids, attention_mask, premise_mask=None, hyp_mask=None, task_id=0):
+    def forward(self, input_ids, token_type_ids, attention_mask, input_mask, premise_mask=None, hyp_mask=None, task_id=0):
         if self.encoder_type == EncoderModelType.ROBERTA:
             sequence_output = self.bert.extract_features(input_ids)
             pooled_output = self.pooler(sequence_output)
+        elif self.encoder_type == EncoderModelType.XLNET:
+            sequence_output = self.bert(input_ids, token_type_ids, input_mask, attention_mask)
         else:
             all_encoder_layers, pooled_output = self.bert(input_ids, token_type_ids, attention_mask)
             sequence_output = all_encoder_layers[-1]

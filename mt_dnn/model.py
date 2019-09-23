@@ -157,7 +157,7 @@ class MTDNNModel(object):
         task_id = batch_meta['task_id']
         task_type = batch_meta['task_type']
         inputs = batch_data[:batch_meta['input_len']]
-        if len(inputs) == 3:
+        if len(inputs) == 4:
             inputs.append(None)
             inputs.append(None)
         inputs.append(task_id)
