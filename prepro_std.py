@@ -264,18 +264,13 @@ def build_data(data, dump_path, tokenizer, task_type, data_format=DataFormat.Pre
                                     labels.append(label[i])
                                 else:
                                     labels.append(0)  # 0 = 'X'
+                        type_ids = [SEG_ID_A for _ in range(len(input_ids))]
                         # 1 = '[CLS]' 2 = '[SEP]'
                         labels = [1] + labels[:max_seq_len - 2] + [2]
                         input_ids = [CLS_ID] + input_ids[:max_seq_len - 2] + [SEP_ID]
+                        type_ids = [SEG_ID_CLS] +  type_ids[:max_seq_len - 2] + [SEG_ID_SEP]
                         assert len(labels) == len(input_ids)
-                        type_ids = [SEG_ID_A for _ in range(len(input_ids))]
                         input_mask = [0 for _ in range(len(input_ids))]
-                        if len(input_ids) < max_seq_len:
-                            delta_len = max_seq_len - len(input_ids)
-                            input_ids = [0] * delta_len + input_ids
-                            labels = [0] * delta_len + labels
-                            input_mask = [1] * delta_len + input_mask
-                            type_ids = [SEG_ID_PAD] * delta_len + type_ids
                     else:
                         input_ids, input_mask, type_ids = xlnet_feature_extractor(
                             premise, max_seq_length=max_seq_len, tokenize_fn=tokenizer)

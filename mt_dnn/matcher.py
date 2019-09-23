@@ -35,7 +35,7 @@ class SANBertNetwork(nn.Module):
             # TODO: can't load model from checkpoint with
             #   RuntimeError: Trying to create tensor with negative dimension -1: [-1, 1024]
             # fix it later
-            self.bert = XLNetModel.from_pretrained('xlnet-large-cased', config=self.bert_config)
+            self.bert = XLNetModel.from_pretrained('xlnet-large-cased')  # , config=self.bert_config)
         else: 
             self.bert_config = BertConfig.from_dict(opt)
             self.bert = BertModel(self.bert_config)
@@ -94,7 +94,7 @@ class SANBertNetwork(nn.Module):
             sequence_output = self.bert.extract_features(input_ids)
             pooled_output = self.pooler(sequence_output)
         elif self.encoder_type == EncoderModelType.XLNET:
-            sequence_output = self.bert(input_ids, token_type_ids, input_mask, attention_mask)
+            sequence_output = self.bert(input_ids, token_type_ids, input_mask)[0]
         else:
             all_encoder_layers, pooled_output = self.bert(input_ids, token_type_ids, attention_mask)
             sequence_output = all_encoder_layers[-1]
@@ -109,7 +109,7 @@ class SANBertNetwork(nn.Module):
             logits = self.scoring_list[task_id](sequence_output, hyp_mem, premise_mask, hyp_mask)
         elif decoder_opt == 2:
             output = self.dropout_list[task_id](sequence_output)
-            output = output.view(-1, output.size(2))
+            output = output.contiguous().view(-1, output.size(2))
             logits = self.scoring_list[task_id](output)
         else:
             pooled_output = self.dropout_list[task_id](pooled_output)
