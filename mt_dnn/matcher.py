@@ -66,7 +66,7 @@ class SANBertNetwork(nn.Module):
                 self.scoring_list.append(out_proj)
 
         self.opt = opt
-        self._my_init()
+        # self._my_init()
 
     def _my_init(self):
         def init_weights(module):
@@ -88,7 +88,7 @@ class SANBertNetwork(nn.Module):
             if isinstance(module, nn.Linear):
                 module.bias.data.zero_()
 
-        self.scoring_list.apply(init_weights)
+        self.apply(init_weights)
 
     def forward(self, input_ids, token_type_ids, attention_mask, input_mask, premise_mask=None, hyp_mask=None, task_id=0):
         if self.encoder_type == EncoderModelType.ROBERTA:
