@@ -29,9 +29,9 @@ with open(new_output_path, 'w') as fp:
         tokens = d['token_id']
         labels = d['label']
         for t, l, p in zip(tokens, labels, preds):
-            if int(l) == 0:
+            if int(l) < 3:
                 continue
-            l = NERLabelMapper.ind2tok(l)
-            p = NERLabelMapper.ind2tok(p)
-            print('\t'.join([t, l, p]), file=fp)
+            l = NERLabelMapper.ind2tok[l]
+            p = NERLabelMapper.ind2tok[p]
+            print(f'{t} {l} {p}', file=fp)
 
