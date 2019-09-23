@@ -36,6 +36,7 @@ class SANBertNetwork(nn.Module):
             #   RuntimeError: Trying to create tensor with negative dimension -1: [-1, 1024]
             # fix it later
             self.bert = XLNetModel.from_pretrained('xlnet-large-cased')  # , config=self.bert_config)
+            hidden_size = self.bert_config.hidden_size
         else: 
             self.bert_config = BertConfig.from_dict(opt)
             self.bert = BertModel(self.bert_config)
