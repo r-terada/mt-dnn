@@ -90,12 +90,12 @@ class SANBertNetwork(nn.Module):
 
         self.apply(init_weights)
 
-    def forward(self, input_ids, token_type_ids, attention_mask, input_mask, premise_mask=None, hyp_mask=None, task_id=0):
+    def forward(self, input_ids, token_type_ids, attention_mask, premise_mask=None, hyp_mask=None, task_id=0):
         if self.encoder_type == EncoderModelType.ROBERTA:
             sequence_output = self.bert.extract_features(input_ids)
             pooled_output = self.pooler(sequence_output)
         elif self.encoder_type == EncoderModelType.XLNET:
-            sequence_output = self.bert(input_ids, token_type_ids, input_mask)[0]
+            sequence_output = self.bert(input_ids, token_type_ids, attention_mask=attention_mask)[0]
         else:
             all_encoder_layers, pooled_output = self.bert(input_ids, token_type_ids, attention_mask)
             sequence_output = all_encoder_layers[-1]

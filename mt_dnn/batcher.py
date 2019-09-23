@@ -121,17 +121,14 @@ class BatchGen:
                 token_ids = torch.LongTensor(batch_size, tok_len).fill_(1)
                 type_ids = torch.LongTensor(batch_size, tok_len).fill_(0)
                 att_masks = torch.LongTensor(batch_size, tok_len).fill_(0)
-                input_masks = torch.LongTensor(batch_size, tok_len).fill_(1)
             if self.encoder_type == EncoderModelType.XLNET:
                 token_ids = torch.LongTensor(batch_size, tok_len).fill_(0)
                 type_ids = torch.LongTensor(batch_size, tok_len).fill_(4)
                 att_masks = torch.LongTensor(batch_size, tok_len).fill_(0)
-                input_masks = torch.LongTensor(batch_size, tok_len).fill_(1)
             else:
                 token_ids = torch.LongTensor(batch_size, tok_len).fill_(0)
                 type_ids = torch.LongTensor(batch_size, tok_len).fill_(0)
                 att_masks = torch.LongTensor(batch_size, tok_len).fill_(0)
-                input_masks = torch.LongTensor(batch_size, tok_len).fill_(1)
             if self.__if_pair__(self.data_type):
                 premise_masks = torch.ByteTensor(batch_size, tok_len).fill_(1)
                 hypothesis_masks = torch.ByteTensor(batch_size, hypothesis_len).fill_(1)
@@ -142,18 +139,9 @@ class BatchGen:
                 if self.is_train:
                     tok = self.__random_select__(tok)
 
-                if self.encoder_type == EncoderModelType.XLNET:
-                    # xlnet use left padding
-                    start = tok_len - select_len
-                    token_ids[i, start:] = torch.LongTensor(tok[:])
-                    type_ids[i, start:] = torch.LongTensor(sample['type_id'][:])
-                    att_masks[i, start:] = torch.LongTensor([1] * select_len)
-                    input_masks[i, start:] = torch.LongTensor(sample['mask'][:])
-                else:
-                    token_ids[i, :select_len] = torch.LongTensor(tok[:select_len])
-                    type_ids[i, :select_len] = torch.LongTensor(sample['type_id'][:select_len])
-                    att_masks[i, :select_len] = torch.LongTensor([1] * select_len)
-                    input_masks[i, :select_len] = torch.LongTensor(sample['mask'][:select_len])
+                token_ids[i, :select_len] = torch.LongTensor(tok[:select_len])
+                type_ids[i, :select_len] = torch.LongTensor(sample['type_id'][:select_len])
+                att_masks[i, :select_len] = torch.LongTensor([1] * select_len)
 
                 if self.__if_pair__(self.data_type):
                     hlen = len(sample['type_id']) - sum(sample['type_id'])
@@ -165,23 +153,21 @@ class BatchGen:
                     'token_id': 0,
                     'segment_id': 1,
                     'mask': 2,
-                    'input_mask': 3,
-                    'premise_mask': 4,
-                    'hypothesis_mask': 5
+                    'premise_mask': 3,
+                    'hypothesis_mask': 4
                     }
-                batch_data = [token_ids, type_ids, att_masks, input_masks, premise_masks, hypothesis_masks]
-                current_idx = 6
-                valid_input_len = 6
+                batch_data = [token_ids, type_ids, att_masks, premise_masks, hypothesis_masks]
+                current_idx = 5
+                valid_input_len = 5
             else:
                 batch_info = {
                     'token_id': 0,
                     'segment_id': 1,
                     'mask': 2,
-                    'input_mask': 3
                     }
-                batch_data = [token_ids, type_ids, att_masks, input_masks]
-                current_idx = 4
-                valid_input_len = 4
+                batch_data = [token_ids, type_ids, att_masks]
+                current_idx = 3
+                valid_input_len = 3
 
             if self.is_train:
                 labels = [sample['label'] for sample in batch]
