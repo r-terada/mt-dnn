@@ -31,11 +31,11 @@ class SANBertNetwork(nn.Module):
             self.pooler = LinearPooler(hidden_size)
         elif opt['encoder_type'] == EncoderModelType.XLNET:
             from pytorch_transformers import XLNetModel, XLNetConfig
-            self.bert_config = XLNetConfig.from_dict(opt)
             # TODO: can't load model from checkpoint with
             #   RuntimeError: Trying to create tensor with negative dimension -1: [-1, 1024]
-            # fix it later
-            self.bert = XLNetModel.from_pretrained('xlnet-large-cased')  # , config=self.bert_config)
+            # Maybe some bugs in namisan`s tf -> pt procedure
+            self.bert_config = XLNetConfig.from_pretrained('xlnet-large-cased')
+            self.bert = XLNetModel.from_pretrained('xlnet-large-cased', config=self.bert_config)
             hidden_size = self.bert_config.hidden_size
         else: 
             self.bert_config = BertConfig.from_dict(opt)

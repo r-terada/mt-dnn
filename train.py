@@ -290,7 +290,7 @@ def main():
     bert_model_path = args.init_checkpoint
     state_dict = None
 
-    if encoder_type in [EncoderModelType.BERT, EncoderModelType.XLNET]:
+    if encoder_type == EncoderModelType.BERT:
         if os.path.exists(bert_model_path):
             state_dict = torch.load(bert_model_path)
             config = state_dict['config']
