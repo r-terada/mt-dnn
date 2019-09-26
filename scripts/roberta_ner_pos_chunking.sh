@@ -21,7 +21,7 @@ optim="adamax"
 grad_clipping=0
 global_grad_clipping=1
 lr="5e-5"
-epoch=10
+epoch=15
 task_def="../experiments/conll/conll_task_def_roberta.yml"
 
 model_dir="checkpoints/${prefix}_${optim}_answer_opt${answer_opt}_gc${grad_clipping}_ggc${global_grad_clipping}_${tstr}"
