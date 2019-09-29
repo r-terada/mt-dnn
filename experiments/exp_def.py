@@ -4,8 +4,10 @@ from data_utils.task_def import TaskType, DataFormat, EncoderModelType
 from data_utils.metrics import Metric
 
 class TaskDefs:
-    def __init__(self, task_def_path):
-        self._task_def_dic = yaml.safe_load(open(task_def_path))
+    def __init__(self, task_def_paths):
+        self._task_def_dic = {}
+        for task_def_path in task_def_paths.split(','):
+            self._task_def_dic.update(yaml.safe_load(open(task_def_path)))
         global_map = {}
         n_class_map = {}
         data_type_map = {}
@@ -24,8 +26,8 @@ class TaskDefs:
             metric_meta_map[task] = tuple(Metric[metric_name] for metric_name in task_def["metric_meta"])
             if "decoder_opt" in task_def:
                 decoder_opt_map[task] = task_def["decoder_opt"]
-            if "san_meta" in task_def:
-                enable_san_map[task] = task_def["decoder_opt"]
+            if "enable_san" in task_def:
+                enable_san_map[task] = task_def["enable_san"]
             if "encoder_type" in task_def:
                 uniq_encoderType.add(EncoderModelType[task_def["encoder_type"]])
             else:
